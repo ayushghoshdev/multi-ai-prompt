@@ -1,0 +1,2 @@
+- Add model fallback incase rate limit is hit.
+- Add error handling
