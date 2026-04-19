@@ -19,22 +19,40 @@ def ask_model(prompt: str):
     if not OPENROUTER_API_KEY:
         raise ValueError("OpenRouter API key not found. Check your .env file.")
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
+    response = None
 
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-    }
+    try:
+        url = "https://openrouter.ai/api/v1/chat/completions"
 
-    data = {
-        "model": "google/gemma-3-4b-it:free",
-        "messages": [{"role": "user", "content": prompt}],
-    }
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
 
-    response = requests.post(url, headers=headers, json=data)
+        data = {
+            "model": "google/gemma-3-4b-it:free",
+            "messages": [{"role": "user", "content": prompt}],
+        }
 
-    result = response.json()
-    return result["choices"][0]["message"]["content"]
+        response = requests.post(url, headers=headers, json=data)
+
+        result = response.json()
+
+        return result["choices"][0]["message"]["content"]
+    except requests.exceptions.HTTPError as http_err:
+        if response is not None:
+            error_info = response.json().get("error", {})
+            code = error_info.get("code")
+            message = error_info.get("message")
+
+            print(f"HTTP error occurred: {http_err}")
+            print(f"OpenRouter Error: [{code}] {message}")
+    except requests.exceptions.ConnectionError:
+        print("Error: Could not connect to OpenRouter.")
+    except requests.exceptions.Timeout:
+        print("Error: The request timed out.")
+    except requests.exceptions.RequestException as err:
+        print(f"An unexpected error occurred: {err}")
 
 
 if __name__ == "__main__":
@@ -51,9 +69,11 @@ if __name__ == "__main__":
         limit = input("Enter word limit (in numbers): ")
         if limit.isdigit():
             reply = ask_model(f"{prompt}\n\nLimit your response to {limit} words.")
-            console.print("\nResponse:")
-            console.print(Markdown(reply))
+            if reply:
+                console.print(Markdown(reply))
         else:
             print("Invalid response. Use numbers only.")
     elif limit_question == "n":
         reply = ask_model(prompt)
+        if reply:
+            console.print(Markdown(reply))
