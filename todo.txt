@@ -1,2 +1,3 @@
 - Add model fallback incase rate limit is hit.
-- Add error handling
+- Split functionality using separate python files.
+- Add AI memory functionality
