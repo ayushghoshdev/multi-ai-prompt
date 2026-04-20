@@ -124,4 +124,4 @@ if __name__ == "__main__":
     model = choose_model()
     reply = ask_model(model, prompt)
     if reply:
-        console.print(Markdown(f"\n{reply}"))
+        console.print(Markdown(f"\n\n{reply}"))
