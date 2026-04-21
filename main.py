@@ -1,5 +1,6 @@
 import os
 import requests
+import base64
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
@@ -46,6 +47,50 @@ def get_limited_prompt(prompt: str):
     return prompt
 
 
+def select_attachment():
+    add_file = input("\nAdd attachment? (y/n): ")
+
+    if add_file not in ["y", "n"]:
+        console.print(Markdown("Invalid response. Use **y** or **n** only."))
+        exit()
+
+    file_content = None
+
+    if add_file == "y":
+        TEXT_EXTENSIONS = [".txt", ".py", ".md", ".json"]
+        IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+
+        file_path = input("Enter file path: ").strip().strip('"').strip("'")
+
+        if not os.path.exists(file_path):
+            print("File not found.")
+            exit()
+
+        ext = "." + file_path.split(".")[-1].lower()
+
+        if ext in TEXT_EXTENSIONS:
+            with open(file_path, "r", encoding="utf-8") as f:
+                file_content = f.read()
+        elif ext in IMAGE_EXTENSIONS:
+            with open(file_path, "rb") as f:
+                base64_content = base64.b64encode(f.read()).decode("utf-8")
+            mime = {
+                "jpg": "jpeg",
+                "jpeg": "jpeg",
+                "png": "png",
+                "gif": "gif",
+                "webp": "webp",
+            }[ext[1:]]
+            file_content = ("image", base64_content, mime)
+        else:
+            print(
+                "Unsupported file type. Supported text: txt, py, md, json; images: jpg, jpeg, png, gif, webp"
+            )
+            exit()
+
+    return file_content
+
+
 def choose_model():
     print("\nChoose a model family:")
     print("1. GPT OSS")
@@ -65,7 +110,7 @@ def choose_model():
         exit()
 
 
-def ask_model(model: str, prompt: str):
+def ask_model(model: str, prompt: str, file_content=None):
     if not OPENROUTER_API_KEY:
         raise ValueError("OpenRouter API key not found. Check your .env file.")
 
@@ -79,9 +124,25 @@ def ask_model(model: str, prompt: str):
             "Content-Type": "application/json",
         }
 
+        if file_content:
+            if isinstance(file_content, str):
+                content = f"{prompt}\n\nAttached file content:\n{file_content}"
+            else:  # tuple ('image', base64, mime)
+                content = [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/{file_content[2]};base64,{file_content[1]}"
+                        },
+                    },
+                ]
+        else:
+            content = prompt
+
         data = {
             "model": model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": content}],
         }
 
         response = requests.post(url, headers=headers, json=data)
@@ -121,7 +182,9 @@ if __name__ == "__main__":
     clear_terminal()
     prompt = str(input("Ask anything: "))
     prompt = get_limited_prompt(prompt)
+    file_content = select_attachment()
     model = choose_model()
-    reply = ask_model(model, prompt)
+    reply = ask_model(model, prompt, file_content)
     if reply:
-        console.print(Markdown(f"\n\n{reply}"))
+        print()
+        console.print(Markdown(f"{reply}"))
