@@ -92,10 +92,10 @@ def select_attachment():
 
 
 def choose_model():
-    print("\nChoose a model family:")
-    print("1. GPT OSS")
-    print("2. Google Gemma")
-    print("3. Meta Llama")
+    console.print("\nChoose a model family:")
+    console.print("1 - GPT OSS")
+    console.print("2 - Google Gemma")
+    console.print("3 - Meta Llama")
 
     choice = input("Enter choice (1/2/3): ")
 
@@ -111,7 +111,7 @@ def choose_model():
 
 
 def choose_model_attachment():
-    print("\nChoose a model family:")
+    console.print("\nChoose a model family:")
     console.print(
         "1 - [strike dim]GPT OSS[/strike dim] [dim]Unavailable for prompts with attachments[/dim]"
     )

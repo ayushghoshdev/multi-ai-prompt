@@ -1,4 +1,4 @@
-- Add model fallback incase rate limit is hit.
-- Split functionality using separate python files.
+- Add model fallback incase rate limit is hit
+- Split functionality using separate python files
 - Add AI memory functionality
-- Automatically detect attachement type
+- Clear terminal after each input to only show input and output
