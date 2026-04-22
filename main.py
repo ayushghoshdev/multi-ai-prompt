@@ -110,6 +110,25 @@ def choose_model():
         exit()
 
 
+def choose_model_attachment():
+    print("\nChoose a model family:")
+    console.print(
+        "1 - [strike dim]GPT OSS[/strike dim] [dim]Unavailable for prompts with attachments[/dim]"
+    )
+    console.print("2 - Google Gemma")
+    console.print("3 - Meta Llama")
+
+    choice = input("Enter choice (2/3): ")
+
+    if choice == "2":
+        return gemma_models[0]
+    elif choice == "3":
+        return llama_models[0]
+    else:
+        console.print(Markdown("Invalid choice. Use **2** or **3** only."))
+        exit()
+
+
 def ask_model(model: str, prompt: str, file_content=None):
     if not OPENROUTER_API_KEY:
         raise ValueError("OpenRouter API key not found. Check your .env file.")
@@ -183,7 +202,10 @@ if __name__ == "__main__":
     prompt = str(input("Ask anything: "))
     prompt = get_limited_prompt(prompt)
     file_content = select_attachment()
-    model = choose_model()
+    if file_content:
+        model = choose_model_attachment()
+    else:
+        model = choose_model()
     reply = ask_model(model, prompt, file_content)
     if reply:
         print()

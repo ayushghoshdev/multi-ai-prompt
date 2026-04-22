@@ -1,5 +1,4 @@
 - Add model fallback incase rate limit is hit.
 - Split functionality using separate python files.
 - Add AI memory functionality
-- Disable GPT when adding attachments
 - Automatically detect attachement type
