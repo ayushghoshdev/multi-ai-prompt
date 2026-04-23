@@ -5,28 +5,14 @@ from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
 
+from models import gpt_models, gemma_models, llama_models
+from utils import clear_terminal
+
 load_dotenv()
 
 console = Console()
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-
-gpt_models = ["openai/gpt-oss-120b:free", "openai/gpt-oss-20b:free"]
-
-gemma_models = [
-    "google/gemma-3-4b-it:free",
-    "google/gemma-3-12b-it:free",
-    "google/gemma-3-27b-it:free",
-]
-
-llama_models = [
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-]
-
-
-def clear_terminal():
-    os.system("cls" if os.name == "nt" else "clear")
 
 
 def get_limited_prompt(prompt: str):
